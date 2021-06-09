@@ -226,3 +226,110 @@ g
 
 PLEASE ADD YOUR SOLUTION BELOW, WITH A CLEAR SEPARATION BETWEEN THE PARTS!
 
+52414: Lab 2 Solutions
+
+Q1. Basic Univariate Statistics.
+Solution: 1.a Make a plot showing the overall ability distribution of all players. How skewed is the distributions? does it have fat tails?
+
+```{r}
+attach(fifa_players) # Attach Set of R Objects to Search Path
+```
+
+```{r}
+ggplot(data = fifa_players,aes(x= Overall))  + geom_density(fill="#00Bfc4",alpha=0.2)+
+  stat_function(fun = dnorm, args = list(mean = mean(fifa_players$Overall), sd = sd(fifa_players$Overall)), col="red", lwd = 0.5) +
+  xlab("Players Overall ability")+
+  ylab("density")+
+  labs(title="a. Players Overall density")+ 
+  theme_light()+
+  scale_colour_economist() 
+```
+
+
+plot comparing the overall ability of players in different Continents 
+
+```{r}
+players.Overall <-  fifa_players$Overall[fifa_players$Overall > 0]
+skewness(players.Overall) # fat tails of players.Overall
+```
+Can be measured with the third standardized moment (skewness).
+$\hatμ_3=\frac{\frac{1}{n}\sum _{i=1}^n\left(x_i-x\right)^3\:}{\left[\frac{1}{n}\sum \:_{i=1}^n\left(x_i-x\right)^2\:\right]^{1.5}}$
+For a symmetric (e.g. Normal) distribution: $μ_3=0$.
+Positive (negative) $μ_3$ indicates long right (left) tail.
+
+```{r}
+zero.Overall <-  fifa_players$WaOverallge[fifa_players$Overall == 0]
+kurtosis(players.Overall) # fat tails of players.Overall
+```
+The kurtosis is defined as: $κ≡μ_4−3$.
+$\hat\mu_4 =\frac{\frac{1}{n}\sum _{i=1}^n\left(x_i-x\right)^4\:}{\left[\frac{1}{n}\sum \:_{i=1}^n\left(x_i-x\right)^2\:\right]^2}$
+For the Normal distribution: $κ=0$.
+Positive (negative) $κ$ indicates long (short) tails compared to Normal.
+
+```{r}
+#better described by a Normal distribution?
+qqnorm(players.Overall)
+qqline(players.Overall, col = "red", lwd = 2)
+```
+
+
+```{r}
+# by density:
+ggplot(data = fifa_players,aes(x= Overall)) + geom_density(aes(fill= factor(Continent)), alpha=0.2)+
+  xlab("Players Overall ability")+
+  ylab("density")+
+  labs(title="b. Players Overall density")+
+  theme_light()+
+  scale_colour_economist()
+
+# by boxplot:
+ ggplot(data = fifa_players,aes(x=Continent,y = Overall))+
+  geom_boxplot()+
+  theme_light()+
+  ylab("Overall")+
+  coord_flip()+
+  labs(title="b. Players Overall Quality by Continent")
+```
+
+
+```{r}
+ggplot(data = fifa_players,aes(x= Value))  + geom_density(fill="#00Bfc4",alpha=0.2)+
+  xlab("Players Value")+
+  ylab("density")+
+  labs(title="c. Players Value")+
+  theme_light()+
+  scale_colour_economist()
+```
+
+```{r}
+# same Value log-transform
+ggplot(data = fifa_players,aes(x=Value))+
+  scale_x_continuous(trans='log10') +  # plot on log-scale 
+  geom_density(fill="#00Bfc4",alpha=0.2)+
+  labs(title="c. Players Value Distribution (log-scale)")+
+  theme_light()
+```
+
+```{r}
+print("d")
+print("Most valued players:")
+top_ten_Value <- fifa_players %>% select(Name,Overall, Value) %>% top_n(10, Value) %>% arrange(desc(Value))
+head(top_ten_Value,10) # Top 10 by value
+
+print("Most Overall players:")
+top_ten_Overall <- fifa_players %>% select(Name, Overall, Value) %>% top_n(10, Overall) %>% arrange(desc(Overall))
+head(top_ten_Overall,10) # Top 10 by Overall
+```
+
+The best player not in the top-10 valued players is Neymar.
+
+```{r}
+print(" ten youngest teams in terms of average players age:")
+ten.youngest <- aggregate(Age, by = list(Club), FUN=mean)
+colnames(ten.youngest)[2] <- "average_Age"
+head(arrange(ten.youngest, average_Age),10)
+
+print(" ten oldest  teams in terms of average players age:")
+head(arrange(ten.youngest, desc(average_Age)),10)
+```
+
