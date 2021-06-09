@@ -229,7 +229,9 @@ PLEASE ADD YOUR SOLUTION BELOW, WITH A CLEAR SEPARATION BETWEEN THE PARTS!
 52414: Lab 2 Solutions
 
 Q1. Basic Univariate Statistics.
-Solution: 1.a Make a plot showing the overall ability distribution of all players. How skewed is the distributions? does it have fat tails?
+Solution:
+1.a Make a plot showing the overall ability distribution of all players.
+How skewed is the distributions? does it have fat tails?
 
 ```{r}
 attach(fifa_players) # Attach Set of R Objects to Search Path
@@ -244,9 +246,6 @@ ggplot(data = fifa_players,aes(x= Overall))  + geom_density(fill="#00Bfc4",alpha
   theme_light()+
   scale_colour_economist() 
 ```
-
-
-plot comparing the overall ability of players in different Continents 
 
 ```{r}
 players.Overall <-  fifa_players$Overall[fifa_players$Overall > 0]
@@ -272,6 +271,7 @@ qqnorm(players.Overall)
 qqline(players.Overall, col = "red", lwd = 2)
 ```
 
+plot comparing the overall ability of players in different Continents 
 
 ```{r}
 # by density:
