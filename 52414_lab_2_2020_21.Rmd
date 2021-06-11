@@ -228,7 +228,7 @@ PLEASE ADD YOUR SOLUTION BELOW, WITH A CLEAR SEPARATION BETWEEN THE PARTS!
 
 52414: Lab 2 Solutions
 
-Q1. Basic Univariate Statistics.
+## Q1. Basic Univariate Statistics.
 Solution:
 1.a Make a plot showing the overall ability distribution of all players.
 How skewed is the distributions? does it have fat tails?
@@ -310,26 +310,85 @@ ggplot(data = fifa_players,aes(x=Value))+
   theme_light()
 ```
 
+d. Most valued players:
 ```{r}
-print("d")
-print("Most valued players:")
 top_ten_Value <- fifa_players %>% select(Name,Overall, Value) %>% top_n(10, Value) %>% arrange(desc(Value))
 head(top_ten_Value,10) # Top 10 by value
+```
 
-print("Most Overall players:")
+Most Overall players:
+```{r}
 top_ten_Overall <- fifa_players %>% select(Name, Overall, Value) %>% top_n(10, Overall) %>% arrange(desc(Overall))
 head(top_ten_Overall,10) # Top 10 by Overall
 ```
 
 The best player not in the top-10 valued players is Neymar.
 
+ten youngest teams in terms of average players age:
 ```{r}
-print(" ten youngest teams in terms of average players age:")
 ten.youngest <- aggregate(Age, by = list(Club), FUN=mean)
 colnames(ten.youngest)[2] <- "average_Age"
 head(arrange(ten.youngest, average_Age),10)
+```
 
-print(" ten oldest  teams in terms of average players age:")
+
+ten oldest  teams in terms of average players age:
+```{r}
 head(arrange(ten.youngest, desc(average_Age)),10)
 ```
+
+
+
+
+
+
+
+
+## Q4. Fix Problematic Plots.
+a.
+this function will be used on each club, in order to describe how scattered the club’s composition. The closer the number to $1$, the more it is described mainly by 1 dominant nationality. Since $p_i∈[0,1]$ we also know that $p^2_i∈[0,1]$ and the closer $p_i$ to 1, the closer $p^2_i$ to 1, so if there’s a nationality with a heavy weight, it’ll be shown as a big parameter DIV. The closer the DIV to 0, that means that each pi was closer to 0, meaning there was no concentration in one main nationality - which mean there’s diversity.
+
+The purpose of the plots is to show of different nationalities in each club and brings the eight highest in terms of the variety of players. The second plot shows the 12 clubs with the lowest index-of-coincidence $∑K_{i=1}p^2_i$. The plot is lacking because it does not take into account the possibility that there are teams with a large number of players compared to other teams, and thus clubs with more players may appear to be more diverse because they have more nationality.
+
+b.
+1. There were no titles to the plots. It’s not obvious what the plots are trying to show.
+2. The labels on the X-axis are overriding one another, and have to be rotated by 90∘ degrees or decrease the caption size.
+3. The square which does not represent any Cain column in the case should be removed as it may skew the reader.
+4. The columns are filled in the same colors only the frame is slightly different but still it is difficult to notice the difference between the columns, different colors should be given to the columns to make it easier for the reader.
+5. The first plot’s Y-axis has a very non-informative also in others axis not so informative.
+6. The function tries to deal with empty cells but ignores a possibility empty string of Club & Nationality.
+
+
+c.
+```{r}
+# A measure of category's diversity
+DIV <- function(category_vec){
+  t <- table(category_vec)
+  p <- t/sum(t)
+  return(sum(p^2))
+}
+
+cleaned_data <- fifa_players %>% select(Nationality,Club) %>% filter(Club !="" & Nationality!="") # we got rid of blank strings
+
+number_of_nationality_in_club <- cleaned_data %>% group_by(Club, Nationality) %>% summarise(count = n()) %>% group_by(Club) %>% summarise(N_nation=n()) %>% arrange(desc(N_nation)) %>% mutate(Club = factor(Club, level=unique(Club)))
+
+DIV_in_club <- cleaned_data %>% group_by(Club) %>% summarise(DIV = DIV(Nationality))%>% arrange(DIV)%>% mutate(Club = factor(Club,level=unique(Club)))  # arrange(desc(DIV)) %>% 
+ 
+
+# Plot number of different nationalities in each club
+g <- ggplot(data = number_of_nationality_in_club %>% head(8), aes(x = Club, y = N_nation,color = Club, fill = Club), cex =0.2)
+g + geom_bar(stat="identity") + ylab("number of nationalities") + labs(title="c. Number of Nationalities for top 8 clubs") + theme(axis.text.x = element_text(face = "bold", size = 10, angle = 30, hjust = 0.9))+ theme(axis.text.x = element_text(face = "bold", size = 10, angle = 30, hjust = 0.9)) + geom_text(aes(y=N_nation + 1 , label = round(N_nation,2)), lwd = 3, show.legend = F)
+
+
+
+# Plot DIV (diversity?) of different nationalities in each club
+g <- ggplot(data = DIV_in_club %>% head(12),aes(x = Club,y = DIV
+, color = Club,fill = Club), cex =0.2)
+g <- g + geom_bar(stat="identity") + ylab("Index of Coincidence") + labs(title="c. Index of coincidence of Nationality for top 12 clubs") + theme(axis.text.x = element_text(face = "bold", size = 10, angle = 30, hjust = 0.9)) + geom_text(aes(y=DIV+0.01 , label = round(DIV,2)), lwd = 3, show.legend = F)
+g
+```
+
+
+
+
 
