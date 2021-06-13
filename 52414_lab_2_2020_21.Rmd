@@ -353,9 +353,8 @@ P
 b. Plot the average difference between a player’s overall ability to potential ability as a function of age, up to age 35. At what ages should we expect to find players for future development based on this graph?
 ```{r}
 average_Overall_Age <- aggregate(Overall, by = list(Age), FUN = mean)
-P + geom_line(data= subset(average_Overall_Age, Group.1<=35), aes(x=Group.1,y=x), color ="red") + geom_point(data= subset(average_Overall_Age, Group.1<=35), aes(x=Group.1,y=x)) + geom_vline(xintercept = c(16,25), color = "#00Bfc4") + geom_text(x=20, y=70 , label="players for future \n development",size = 4, family="mono")
-
-
+P + geom_line(data= subset(average_Overall_Age, Group.1<=35), aes(x=Group.1,y=x), color ="red") + geom_point(data= subset(average_Overall_Age, Group.1<=35), aes(x=Group.1,y=x)) + geom_vline(xintercept = c(16,25), color = "#00Bfc4") + geom_text(x=20, y=70 , label="players for future \n development",size = 4, family="mono") + geom_text(x=33.5, y=75.5, label="red line is \n Overall average ",size = 3, family="mono", color = "red") +
+  geom_text(x=33.5, y=73, label="black line is \n Potential average ",size = 3, family="mono", color = "black") 
 
 fifa_players <-  mutate(fifa_players ,diff_Overall_Potential = Potential - Overall)
 Diff_Overall_Potential <- aggregate(fifa_players$diff_Overall_Potential, by = list(Age), FUN = mean)
