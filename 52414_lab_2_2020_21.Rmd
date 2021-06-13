@@ -77,6 +77,9 @@ library(ggrepel)# Use ggrepel::geom_label_repel
 library(extrafont) # Changing fonts in ggplot2
 loadfonts(device = "win")
 library(knitr) # this is used for printing tables with kable
+library(tibble) # use it to add a row to a data frame
+library(RColorBrewer) # for Choosing a color
+
 
 options("scipen"=100, "digits"=4)  # avoid scientific display of digits. Take 4 digits. 
 
@@ -392,44 +395,60 @@ kable(potential %>% arrange(desc(resid)) %>% select(Name, Age, Potential, Overal
 d. Your boss wants to fly abroad to recruit promising players. Use the rworldmap package to display the world map and color each country based on the median potential of players from this nationality.
 
 ```{r}
-library(RColorBrewer) # for Choosing a color
+#  add a column of the Potential value in order to median each country's players
+fifa <-  mutate(fifa , med = Potential)
+nationality <- aggregate(med ~ Nationality, data = fifa, FUN = median)
 
-# because fifa is with out NA.
-nationality <- aggregate(Potential ~ Nationality, data = fifa, FUN = median)
+# median United kingdom we'll have to median the players in each part 
+median.UK <- median(nationality$med[which(nationality$Nationality=="England"|nationality$Nationality=="Wales"|nationality$Nationality=="Scotland"|nationality$Nationality=="Republic of Ireland")])
 
-# creating  the map
+# the number of players in each part of the UK will be of use during the next question:
+Wales <- nationality$Ones[which(nationality$Nationality=="Wales")]
+Ireland <-nationality$Ones[which(nationality$Nationality=="Republic of Ireland")]
+Scotland <-nationality$Ones[which(nationality$Nationality=="Scotland")]
+England <- nationality$Ones[which(nationality$Nationality=="England")]
+
+# add a row of united kingdom with the median.
+nationality <- add_row(.data = nationality, Nationality = "United Kingdom", med = median.UK)
+
+# deleting the rows of England, Wales, Scotland and Republic of Ireland
+nationality <- nationality[-which(nationality$Nationality=="England"|nationality$Nationality=="Wales"| nationality$Nationality=="Scotland"|nationality$Nationality=="Republic of Ireland"),]
+
+#creating the map
 sPDF  <- joinCountryData2Map(dF = nationality, joinCode = "NAME", nameJoinColumn = "Nationality",verbose=F) # Prepare data to plot
 
+#ploting the world map:
 colourPalette <- brewer.pal(7,'RdYlGn') # Choosing a color
-mapCountryData(sPDF,nameColumnToPlot="Potential",colourPalette=colourPalette,catMethod='fixedWidth', mapTitle = "d. median of Potential by country")
-
-
+mapCountryData(sPDF,nameColumnToPlot="med",colourPalette=colourPalette,catMethod='fixedWidth', mapTitle = "d. median of Potential by country")
 ```
+
+e. Repeat the above analysis but this time display a world map where each country is colored by the median ratio of potential to value of players. Find an under-valued country you’d recommend to travel to (i.e. a country with cheap players compared to their potential average quality).
 ```{r}
-# # in order to color the United kingdom we'll have to median uk.
-# median_UK <- median(nationality$Potential[which(nationality$Nationality=="England"|nationality$Nationality=="Wales"|nationality$Nationality=="Scotland"|nationality$Nationality=="Republic of Ireland")])
+#  add a column of the ratio of potential to value of players.
+# fifa_players <-  mutate(fifa_players , ratio_med = Value/Potential)
+# nationality.ratio <- aggregate(ratio_med ~ Nationality, data = fifa_players, FUN = median)
 # 
-# wales <- nationality$Potential[which(nationality$Nationality=="Wales")]
-# ireland <-nationality$Potential[which(nationality$Nationality=="Republic of Ireland")]
-# scotland <-nationality$Potential[which(nationality$Nationality=="Scotland")]
-# england <- nationality$Potential[which(nationality$Nationality=="England")]
+# # median United kingdom we'll have to median the players in each part 
+# ratio_med.UK <- median(nationality.ratio$med[which(nationality.ratio$Nationality=="England"|nationality.ratio$Nationality=="Wales"|nationality.ratio$Nationality=="Scotland"|nationality.ratio$Nationality=="Republic of Ireland")])
+# 
+# Wales <- nationality.ratio$ratio_med[which(nationality.ratio$Nationality=="Wales")]
+# Ireland <-nationality.ratio$ratio_med[which(nationality.ratio$Nationality=="Republic of Ireland")]
+# Scotland <-nationality.ratio$ratio_med[which(nationality.ratio$Nationality=="Scotland")]
+# England <- nationality.ratio$ratio_med[which(nationality.ratio$Nationality=="England")]
+# 
+# 
 # # add a row of united kingdom with the median.
-# nationality <- add_row(.data = nationality, Nationality = "United Kingdom", Potential = total_UK)
+# nationality.ratio <- add_row(.data = nationality.ratio, Nationality = "United Kingdom", ratio_med = ratio_med.UK)
 # 
 # # deleting the rows of England, Wales, Scotland and Republic of Ireland
-# nationality <- nationality[-which(nationality$Nationality=="England"|nationality$Nationality=="Wales"|nationality$Nationality=="Scotland"|nationality$Nationality=="Republic of Ireland"),]
+# nationality.ratio <- nationality.ratio[-which(nationality.ratio$Nationality=="England"|nationality.ratio$Nationality=="Wales"| nationality.ratio$Nationality=="Scotland"|nationality.ratio$Nationality=="Republic of Ireland"),]
 # 
-# # creating  the map
-# sPDF  <- joinCountryData2Map(dF = nationality, joinCode = "NAME", nameJoinColumn = "Nationality",verbose=F) # Prepare data to plot
-# 
+# #creating the map
+# sPDF  <- joinCountryData2Map(dF = nationality.ratio, joinCode = "NAME", nameJoinColumn = "Nationality",verbose=F) # Prepare data to plot
 # 
 # #ploting the world map:
-# world_map <- mapCountryData(sPDF,nameColumnToPlot = "Potential", catMethod = "fixedWidth", colourPalette = colourPalette,
-#              oceanCol = "whitesmoke", mapTitle = "Players Per Country", addLegend = T)
-# 
-# 
 # colourPalette <- brewer.pal(7,'RdYlGn') # Choosing a color
-# mapCountryData(sPDF,nameColumnToPlot="Potential",colourPalette=colourPalette,catMethod='fixedWidth', mapTitle = "d. median of Potential by country")
+# mapCountryData(sPDF,nameColumnToPlot="ratio_med",colourPalette=colourPalette,catMethod='fixedWidth', mapTitle = "d. median ratio of potential to value of players by country")
 ```
 
 
