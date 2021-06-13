@@ -74,7 +74,9 @@ library(radarchart) #Spider chart
 library(e1071) #Q1.c -  skewness() and kurtosis()
 library(grid) # geom_segment
 library(ggrepel)# Use ggrepel::geom_label_repel
-
+library(extrafont) # Changing fonts in ggplot2
+loadfonts(device = "win")
+library(knitr) # this is used for printing tables with kable
 
 options("scipen"=100, "digits"=4)  # avoid scientific display of digits. Take 4 digits. 
 
@@ -249,7 +251,7 @@ ggplot(data = fifa_players,aes(x= Overall))  + geom_density(fill="#00Bfc4",alpha
 
 ```{r}
 players.Overall <-  fifa_players$Overall[fifa_players$Overall > 0]
-skewness(players.Overall) # fat tails of players.Overall
+kable(skewness(players.Overall)) # fat tails of players.Overall
 ```
 Can be measured with the third standardized moment (skewness).
 $\hatμ_3=\frac{\frac{1}{n}\sum _{i=1}^n\left(x_i-x\right)^3\:}{\left[\frac{1}{n}\sum \:_{i=1}^n\left(x_i-x\right)^2\:\right]^{1.5}}$
@@ -258,7 +260,7 @@ Positive (negative) $μ_3$ indicates long right (left) tail.
 
 ```{r}
 zero.Overall <-  fifa_players$WaOverallge[fifa_players$Overall == 0]
-kurtosis(players.Overall) # fat tails of players.Overall
+kable(kurtosis(players.Overall)) # fat tails of players.Overall
 ```
 The kurtosis is defined as: $κ≡μ_4−3$.
 $\hat\mu_4 =\frac{\frac{1}{n}\sum _{i=1}^n\left(x_i-x\right)^4\:}{\left[\frac{1}{n}\sum \:_{i=1}^n\left(x_i-x\right)^2\:\right]^2}$
@@ -280,7 +282,7 @@ ggplot(data = fifa_players,aes(x= Overall)) + geom_density(aes(fill= factor(Cont
   ylab("density")+
   labs(title="b. Players Overall density")+
   theme_light()+
-  scale_colour_economist()
+  scale_colour_economist() 
 
 # by boxplot:
  ggplot(data = fifa_players,aes(x=Continent,y = Overall))+
@@ -307,19 +309,19 @@ ggplot(data = fifa_players,aes(x=Value))+
   scale_x_continuous(trans='log10') +  # plot on log-scale 
   geom_density(fill="#00Bfc4",alpha=0.2)+
   labs(title="c. Players Value Distribution (log-scale)")+
-  theme_light()
+  theme_light() 
 ```
 
 d. Most valued players:
 ```{r}
 top_ten_Value <- fifa_players %>% select(Name,Overall, Value) %>% top_n(10, Value) %>% arrange(desc(Value))
-head(top_ten_Value,10) # Top 10 by value
+kable(head(top_ten_Value,10)) # Top 10 by value
 ```
 
 Most Overall players:
 ```{r}
 top_ten_Overall <- fifa_players %>% select(Name, Overall, Value) %>% top_n(10, Overall) %>% arrange(desc(Overall))
-head(top_ten_Overall,10) # Top 10 by Overall
+kable(head(top_ten_Overall,10)) # Top 10 by Overall
 ```
 
 The best player not in the top-10 valued players is Neymar.
@@ -328,27 +330,52 @@ ten youngest teams in terms of average players age:
 ```{r}
 ten.youngest <- aggregate(Age, by = list(Club), FUN=mean)
 colnames(ten.youngest)[2] <- "average_Age"
-head(arrange(ten.youngest, average_Age),10)
+kable(head(arrange(ten.youngest, average_Age),10))
 ```
 
 
 ten oldest  teams in terms of average players age:
 ```{r}
-head(arrange(ten.youngest, desc(average_Age)),10)
+kable(head(arrange(ten.youngest, desc(average_Age)),10))
 ```
 
+## Q2. Scouting Report.
+
+a. Plot the average `potential` ability by `age` of all players, for players 35 years old or younger.
+```{r}
+average_Ponalties_Age <- aggregate(Potential, by = list(Age), FUN = mean)
+P <- ggplot(data= subset(average_Ponalties_Age, Group.1<=35), aes(x=Group.1,y=x)) + geom_line() +
+    geom_point() + theme_light() +
+  labs(title="2.a Average potential ability by Age for Players under 35") + xlab("Age") + ylab("Penalties")
+P
+```
+
+b. Plot the average difference between a player’s overall ability to potential ability as a function of age, up to age 35. At what ages should we expect to find players for future development based on this graph?
+```{r}
+average_Overall_Age <- aggregate(Overall, by = list(Age), FUN = mean)
+P + geom_line(data= subset(average_Overall_Age, Group.1<=35), aes(x=Group.1,y=x), color ="red") + geom_point(data= subset(average_Overall_Age, Group.1<=35), aes(x=Group.1,y=x)) + geom_vline(xintercept = c(16,25), color = "#00Bfc4") + geom_text(x=20, y=70 , label="players for future \n development",size = 4, family="mono")
 
 
 
-
-
+fifa_players <-  mutate(fifa_players ,diff_Overall_Potential = Potential - Overall)
+Diff_Overall_Potential <- aggregate(fifa_players$diff_Overall_Potential, by = list(Age), FUN = mean)
+ggplot(data = subset(Diff_Overall_Potential,Group.1<=35),aes(x=Group.1,y=x))+
+  geom_line() +geom_point() + labs(title="2.b. average Difference between a player’s overall ability to potential ability by age") +
+  xlab("Age")+
+  ylab("Potential vs Overall") + theme_light() + geom_vline(xintercept = c(16,25), color = "#00Bfc4") + geom_text(x=20, y=2, label="players for future \n development",size = 4, family="mono")
+```
+ 
+We can see a pattern: the older the player, the smaller the difference between the player's general ability and the potential ability. This may be because at the young age of 16 players have a wide range of potentials, some may be average and some may be promising - which means a high variance of differences.
+The older the player - the more he exploits his potential - therefore - the smaller the difference.
+We expect to find players for future development between the ages of 16 and 25, this is because according to the graph there is a difference of 2.5 units (or more) the difference between the potential and the current skill.
 
 
 ## Q4. Fix Problematic Plots.
 a.
-this function will be used on each club, in order to describe how scattered the club’s composition. The closer the number to $1$, the more it is described mainly by 1 dominant nationality. Since $p_i∈[0,1]$ we also know that $p^2_i∈[0,1]$ and the closer $p_i$ to 1, the closer $p^2_i$ to 1, so if there’s a nationality with a heavy weight, it’ll be shown as a big parameter DIV. The closer the DIV to 0, that means that each pi was closer to 0, meaning there was no concentration in one main nationality - which mean there’s diversity.
-
-The purpose of the plots is to show of different nationalities in each club and brings the eight highest in terms of the variety of players. The second plot shows the 12 clubs with the lowest index-of-coincidence $∑K_{i=1}p^2_i$. The plot is lacking because it does not take into account the possibility that there are teams with a large number of players compared to other teams, and thus clubs with more players may appear to be more diverse because they have more nationality.
+The purpose of the plots is to show of different nationalities in each club and brings the eight highest in terms of the variety of players.
+The second plot shows the 12 clubs with the lowest index-of-coincidence $∑K_{i=1}p^2_i$. 
+This method took into account the proportions of players from each country and not just the total number of players of each club.
+The index suffers from not being able to handle the possibility that there are clubs with a greater number of players from another club, as a result of which they may seem more diverse than a club with a lower number of players.
 
 b.
 1. There were no titles to the plots. It’s not obvious what the plots are trying to show.
@@ -358,6 +385,7 @@ b.
 5. The first plot’s Y-axis has a very non-informative also in others axis not so informative.
 6. The function tries to deal with empty cells but ignores a possibility empty string of Club & Nationality.
 
+Since a legend on the side of the plot loads the reader and does not recreate anything since a detail is found on the x-axis then I will delete this legend.
 
 c.
 ```{r}
@@ -372,19 +400,21 @@ cleaned_data <- fifa_players %>% select(Nationality,Club) %>% filter(Club !="" &
 
 number_of_nationality_in_club <- cleaned_data %>% group_by(Club, Nationality) %>% summarise(count = n()) %>% group_by(Club) %>% summarise(N_nation=n()) %>% arrange(desc(N_nation)) %>% mutate(Club = factor(Club, level=unique(Club)))
 
-DIV_in_club <- cleaned_data %>% group_by(Club) %>% summarise(DIV = DIV(Nationality))%>% arrange(DIV)%>% mutate(Club = factor(Club,level=unique(Club)))  # arrange(desc(DIV)) %>% 
+DIV_in_club <- cleaned_data %>% group_by(Club) %>% summarise(DIV = DIV(Nationality)) %>% arrange(DIV) %>% mutate(Club = factor(Club,level=unique(Club)))  # arrange(desc(DIV)) %>% 
  
 
 # Plot number of different nationalities in each club
-g <- ggplot(data = number_of_nationality_in_club %>% head(8), aes(x = Club, y = N_nation,color = Club, fill = Club), cex =0.2)
-g + geom_bar(stat="identity") + ylab("number of nationalities") + labs(title="c. Number of Nationalities for top 8 clubs") + theme(axis.text.x = element_text(face = "bold", size = 10, angle = 30, hjust = 0.9))+ theme(axis.text.x = element_text(face = "bold", size = 10, angle = 30, hjust = 0.9)) + geom_text(aes(y=N_nation + 1 , label = round(N_nation,2)), lwd = 3, show.legend = F)
+g <- ggplot(data = number_of_nationality_in_club %>% head(8), aes(x = Club, y = N_nation,color = Club, fill = Club), cex =0.2) + theme_classic()
+g + geom_bar(stat="identity") + ylab("number of nationalities") + labs(title="c. Number of Nationalities for top 8 clubs") + theme(axis.text.x = element_text(face = "bold", size = 10, angle = 30, hjust = 0.9))+ theme(axis.text.x = element_text(face = "bold", size = 10, angle = 30, hjust = 0.9)) + geom_text(aes(y=N_nation + 1 , label = round(N_nation,2)), lwd = 3, show.legend = F) + scale_fill_hue(c = 40) + theme(legend.position="none") + 
+  theme(text=element_text(size = 10, family="mono"))
 
 
 
 # Plot DIV (diversity?) of different nationalities in each club
 g <- ggplot(data = DIV_in_club %>% head(12),aes(x = Club,y = DIV
-, color = Club,fill = Club), cex =0.2)
-g <- g + geom_bar(stat="identity") + ylab("Index of Coincidence") + labs(title="c. Index of coincidence of Nationality for top 12 clubs") + theme(axis.text.x = element_text(face = "bold", size = 10, angle = 30, hjust = 0.9)) + geom_text(aes(y=DIV+0.01 , label = round(DIV,2)), lwd = 3, show.legend = F)
+, color = Club,fill = Club), cex =0.2) + theme_classic()
+g <- g + geom_bar(stat="identity") + ylab("Index of Coincidence") + labs(title="c. Index of coincidence of Nationality for top 12 clubs") + theme(axis.text.x = element_text(face = "bold", size = 10, angle = 30, hjust = 0.9)) + geom_text(aes(y=DIV+0.01 , label = round(DIV,2)), lwd = 3, show.legend = F) + scale_fill_hue(c = 40) + theme(legend.position="none") + 
+  theme(text=element_text(size = 10, family="mono"))
 g
 ```
 
