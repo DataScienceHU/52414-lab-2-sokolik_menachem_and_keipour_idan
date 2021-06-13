@@ -324,7 +324,7 @@ top_ten_Overall <- fifa_players %>% select(Name, Overall, Value) %>% top_n(10, O
 kable(head(top_ten_Overall,10)) # Top 10 by Overall
 ```
 
-The best player not in the top-10 valued players is Neymar.
+The best player not in the top-10 valued players is: *Neymar*.
 
 ten youngest teams in terms of average players age:
 ```{r}
@@ -346,7 +346,7 @@ a. Plot the average `potential` ability by `age` of all players, for players 35 
 average_Ponalties_Age <- aggregate(Potential, by = list(Age), FUN = mean)
 P <- ggplot(data= subset(average_Ponalties_Age, Group.1<=35), aes(x=Group.1,y=x)) + geom_line() +
     geom_point() + theme_light() +
-  labs(title="2.a Average potential ability by Age for Players under 35") + xlab("Age") + ylab("Penalties")
+  labs(title="2.a Average potential ability by Age for Players under 35") + xlab("Age") + ylab("Ponalties")
 P
 ```
 
