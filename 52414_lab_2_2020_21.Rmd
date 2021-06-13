@@ -368,6 +368,70 @@ We can see a pattern: the older the player, the smaller the difference between t
 The older the player - the more he exploits his potential - therefore - the smaller the difference.
 We expect to find players for future development between the ages of 16 and 25, this is because according to the graph there is a difference of 2.5 units (or more) the difference between the potential and the current skill.
 
+c. 
+```{r}
+potential <- subset(fifa_players, Overall>70 & Age<=21)
+
+# Creating a linear model:
+potential.fit <- lm(Potential ~ Value, data = potential)
+
+# plotting wage and potential for these young players:
+ggplot(data = potential, aes(x = Value, y=Potential)) + geom_point(aes(color=Overall)) +
+  ggtitle(label = "c. Potential VS Value for players under 21") + 
+  geom_smooth(method = "lm", formula= y~x) + theme_light()
+```
+
+```{r}
+# add_residuals of potential.fit
+potential <-  mutate(potential , resid = round(resid(potential.fit), 3))
+potential <-  mutate(potential , Market_Value  = round((potential$Potential - potential.fit$coefficients[[1]]) / potential.fit$coefficients[[2]], 3))
+# Find table with best residuals 
+kable(potential %>% arrange(desc(resid)) %>% select(Name, Age, Potential, Overall, resid, Value, Market_Value) %>% head(10))
+```
+
+d. Your boss wants to fly abroad to recruit promising players. Use the rworldmap package to display the world map and color each country based on the median potential of players from this nationality.
+
+```{r}
+library(RColorBrewer) # for Choosing a color
+
+# because fifa is with out NA.
+nationality <- aggregate(Potential ~ Nationality, data = fifa, FUN = median)
+
+# creating  the map
+sPDF  <- joinCountryData2Map(dF = nationality, joinCode = "NAME", nameJoinColumn = "Nationality",verbose=F) # Prepare data to plot
+
+colourPalette <- brewer.pal(7,'RdYlGn') # Choosing a color
+mapCountryData(sPDF,nameColumnToPlot="Potential",colourPalette=colourPalette,catMethod='fixedWidth', mapTitle = "d. median of Potential by country")
+
+
+```
+```{r}
+# # in order to color the United kingdom we'll have to median uk.
+# median_UK <- median(nationality$Potential[which(nationality$Nationality=="England"|nationality$Nationality=="Wales"|nationality$Nationality=="Scotland"|nationality$Nationality=="Republic of Ireland")])
+# 
+# wales <- nationality$Potential[which(nationality$Nationality=="Wales")]
+# ireland <-nationality$Potential[which(nationality$Nationality=="Republic of Ireland")]
+# scotland <-nationality$Potential[which(nationality$Nationality=="Scotland")]
+# england <- nationality$Potential[which(nationality$Nationality=="England")]
+# # add a row of united kingdom with the median.
+# nationality <- add_row(.data = nationality, Nationality = "United Kingdom", Potential = total_UK)
+# 
+# # deleting the rows of England, Wales, Scotland and Republic of Ireland
+# nationality <- nationality[-which(nationality$Nationality=="England"|nationality$Nationality=="Wales"|nationality$Nationality=="Scotland"|nationality$Nationality=="Republic of Ireland"),]
+# 
+# # creating  the map
+# sPDF  <- joinCountryData2Map(dF = nationality, joinCode = "NAME", nameJoinColumn = "Nationality",verbose=F) # Prepare data to plot
+# 
+# 
+# #ploting the world map:
+# world_map <- mapCountryData(sPDF,nameColumnToPlot = "Potential", catMethod = "fixedWidth", colourPalette = colourPalette,
+#              oceanCol = "whitesmoke", mapTitle = "Players Per Country", addLegend = T)
+# 
+# 
+# colourPalette <- brewer.pal(7,'RdYlGn') # Choosing a color
+# mapCountryData(sPDF,nameColumnToPlot="Potential",colourPalette=colourPalette,catMethod='fixedWidth', mapTitle = "d. median of Potential by country")
+```
+
 
 ## Q4. Fix Problematic Plots.
 a.
