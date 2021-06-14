@@ -337,16 +337,16 @@ ten youngest teams in terms of average players age:
 ten.youngest <- aggregate(Age, by = list(Club), FUN=mean)
 colnames(ten.youngest)[2] <- "average_Age"
 ten.youngest.teams <- head(arrange(ten.youngest, average_Age),10)
-names(ten.youngest.teams)<-c("team","average Age")
-knitr::kable(ten.youngest.teams, caption = "ten youngest teams in terms of average players age.")
+names(ten.youngest.teams)<-c("Team","average Age")
+knitr::kable(ten.youngest.teams, caption = "Ten youngest teams in terms of average players age.")
 ```
 
 
 ten oldest  teams in terms of average players age:
 ```{r}
 ten.oldest.teams <- head(arrange(ten.youngest, desc(average_Age)),10)
-names(ten.youngest.teams)<-c("team","average Age")
-knitr::kable(ten.youngest.teams, caption = "ten oldest teams in terms of average players age.")
+names(ten.youngest.teams)<-c("Team","average Age")
+knitr::kable(ten.youngest.teams, caption = "Ten oldest teams in terms of average players age.")
 ```
 
 ## Q2. Scouting Report.
@@ -396,7 +396,7 @@ ggplot(data = potential, aes(x = Value, y=Potential)) + geom_point(aes(color=Ove
 potential <-  mutate(potential , resid = round(resid(potential.fit), 3))
 potential <-  mutate(potential , Market_Value  = round((potential$Potential - potential.fit$coefficients[[1]]) / potential.fit$coefficients[[2]], 3))
 # Find table with best residuals 
-knitr::kable(potential %>% arrange(desc(resid)) %>% select(Name, Age, Potential, Overall, resid, Value, Market_Value) %>% head(10), caption = "ten players.")
+knitr::kable(potential %>% arrange(desc(resid)) %>% select(Name, Age, Potential, Overall, resid, Value, Market_Value) %>% head(10))
 
 
 ```

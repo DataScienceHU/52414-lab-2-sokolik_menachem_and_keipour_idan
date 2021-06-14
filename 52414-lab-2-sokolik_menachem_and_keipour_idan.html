@@ -545,13 +545,13 @@ knitr::kable(head(top_ten_Overall,10), caption = &quot;Most valued players.&quot
 <pre class="r"><code>ten.youngest &lt;- aggregate(Age, by = list(Club), FUN=mean)
 colnames(ten.youngest)[2] &lt;- &quot;average_Age&quot;
 ten.youngest.teams &lt;- head(arrange(ten.youngest, average_Age),10)
-names(ten.youngest.teams)&lt;-c(&quot;team&quot;,&quot;average Age&quot;)
-knitr::kable(ten.youngest.teams, caption = &quot;ten youngest teams in terms of average players age.&quot;)</code></pre>
+names(ten.youngest.teams)&lt;-c(&quot;Team&quot;,&quot;average Age&quot;)
+knitr::kable(ten.youngest.teams, caption = &quot;Ten youngest teams in terms of average players age.&quot;)</code></pre>
 <table>
-<caption>ten youngest teams in terms of average players age.</caption>
+<caption>Ten youngest teams in terms of average players age.</caption>
 <thead>
 <tr class="header">
-<th align="left">team</th>
+<th align="left">Team</th>
 <th align="right">average Age</th>
 </tr>
 </thead>
@@ -600,13 +600,13 @@ knitr::kable(ten.youngest.teams, caption = &quot;ten youngest teams in terms of 
 </table>
 <p>ten oldest teams in terms of average players age:</p>
 <pre class="r"><code>ten.oldest.teams &lt;- head(arrange(ten.youngest, desc(average_Age)),10)
-names(ten.youngest.teams)&lt;-c(&quot;team&quot;,&quot;average Age&quot;)
-knitr::kable(ten.youngest.teams, caption = &quot;ten oldest teams in terms of average players age.&quot;)</code></pre>
+names(ten.youngest.teams)&lt;-c(&quot;Team&quot;,&quot;average Age&quot;)
+knitr::kable(ten.youngest.teams, caption = &quot;Ten oldest teams in terms of average players age.&quot;)</code></pre>
 <table>
-<caption>ten oldest teams in terms of average players age.</caption>
+<caption>Ten oldest teams in terms of average players age.</caption>
 <thead>
 <tr class="header">
-<th align="left">team</th>
+<th align="left">Team</th>
 <th align="right">average Age</th>
 </tr>
 </thead>
@@ -697,9 +697,8 @@ ggplot(data = potential, aes(x = Value, y=Potential)) + geom_point(aes(color=Ove
 potential &lt;-  mutate(potential , resid = round(resid(potential.fit), 3))
 potential &lt;-  mutate(potential , Market_Value  = round((potential$Potential - potential.fit$coefficients[[1]]) / potential.fit$coefficients[[2]], 3))
 # Find table with best residuals 
-knitr::kable(potential %&gt;% arrange(desc(resid)) %&gt;% select(Name, Age, Potential, Overall, resid, Value, Market_Value) %&gt;% head(10), caption = &quot;ten players.&quot;)</code></pre>
+knitr::kable(potential %&gt;% arrange(desc(resid)) %&gt;% select(Name, Age, Potential, Overall, resid, Value, Market_Value) %&gt;% head(10))</code></pre>
 <table>
-<caption>ten players.</caption>
 <thead>
 <tr class="header">
 <th align="left">Name</th>
