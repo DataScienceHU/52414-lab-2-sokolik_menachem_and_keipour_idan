@@ -254,7 +254,8 @@ ggplot(data = fifa_players,aes(x= Overall))  + geom_density(fill="#00Bfc4",alpha
 
 ```{r}
 players.Overall <-  fifa_players$Overall[fifa_players$Overall > 0]
-kable(skewness(players.Overall)) # fat tails of players.Overall
+knitr::kable(skewness(players.Overall), col.names = NULL, caption = "The skewness is") # skewed
+
 ```
 Can be measured with the third standardized moment (skewness).
 $\hatμ_3=\frac{\frac{1}{n}\sum _{i=1}^n\left(x_i-x\right)^3\:}{\left[\frac{1}{n}\sum \:_{i=1}^n\left(x_i-x\right)^2\:\right]^{1.5}}$
@@ -263,7 +264,7 @@ Positive (negative) $μ_3$ indicates long right (left) tail.
 
 ```{r}
 zero.Overall <-  fifa_players$WaOverallge[fifa_players$Overall == 0]
-kable(kurtosis(players.Overall)) # fat tails of players.Overall
+knitr::kable(kurtosis(players.Overall) , col.names = NULL, caption = "The kurtosis is") # fat tails of players.Overall
 ```
 The kurtosis is defined as: $κ≡μ_4−3$.
 $\hat\mu_4 =\frac{\frac{1}{n}\sum _{i=1}^n\left(x_i-x\right)^4\:}{\left[\frac{1}{n}\sum \:_{i=1}^n\left(x_i-x\right)^2\:\right]^2}$
@@ -318,28 +319,34 @@ ggplot(data = fifa_players,aes(x=Value))+
 d. Most valued players:
 ```{r}
 top_ten_Value <- fifa_players %>% select(Name,Overall, Value) %>% top_n(10, Value) %>% arrange(desc(Value))
-kable(head(top_ten_Value,10)) # Top 10 by value
+knitr::kable(head(top_ten_Value,10), caption = "Most valued players.")
+
 ```
 
 Most Overall players:
 ```{r}
 top_ten_Overall <- fifa_players %>% select(Name, Overall, Value) %>% top_n(10, Overall) %>% arrange(desc(Overall))
-kable(head(top_ten_Overall,10)) # Top 10 by Overall
+knitr::kable(head(top_ten_Overall,10), caption = "Most valued players.")
+ # Top 10 by Overall
 ```
 
-The best player not in the top-10 valued players is: *Neymar*.
+The best player not in the top-10 valued players is: **Neymar**.
 
 ten youngest teams in terms of average players age:
 ```{r}
 ten.youngest <- aggregate(Age, by = list(Club), FUN=mean)
 colnames(ten.youngest)[2] <- "average_Age"
-kable(head(arrange(ten.youngest, average_Age),10))
+ten.youngest.teams <- head(arrange(ten.youngest, average_Age),10)
+names(ten.youngest.teams)<-c("team","average Age")
+knitr::kable(ten.youngest.teams, caption = "ten youngest teams in terms of average players age.")
 ```
 
 
 ten oldest  teams in terms of average players age:
 ```{r}
-kable(head(arrange(ten.youngest, desc(average_Age)),10))
+ten.oldest.teams <- head(arrange(ten.youngest, desc(average_Age)),10)
+names(ten.youngest.teams)<-c("team","average Age")
+knitr::kable(ten.youngest.teams, caption = "ten oldest teams in terms of average players age.")
 ```
 
 ## Q2. Scouting Report.
@@ -389,24 +396,21 @@ ggplot(data = potential, aes(x = Value, y=Potential)) + geom_point(aes(color=Ove
 potential <-  mutate(potential , resid = round(resid(potential.fit), 3))
 potential <-  mutate(potential , Market_Value  = round((potential$Potential - potential.fit$coefficients[[1]]) / potential.fit$coefficients[[2]], 3))
 # Find table with best residuals 
-kable(potential %>% arrange(desc(resid)) %>% select(Name, Age, Potential, Overall, resid, Value, Market_Value) %>% head(10))
+knitr::kable(potential %>% arrange(desc(resid)) %>% select(Name, Age, Potential, Overall, resid, Value, Market_Value) %>% head(10), caption = "ten players.")
+
+
 ```
 
 d. Your boss wants to fly abroad to recruit promising players. Use the rworldmap package to display the world map and color each country based on the median potential of players from this nationality.
 
 ```{r}
 #  add a column of the Potential value in order to median each country's players
-fifa <-  mutate(fifa , med = Potential)
-nationality <- aggregate(med ~ Nationality, data = fifa, FUN = median)
+fifa.3c <- fifa
+fifa.3c <-  mutate(fifa.3c , med = Potential)
+nationality <- aggregate(med ~ Nationality, data = fifa.3c, FUN = median)
 
 # median United kingdom we'll have to median the players in each part 
 median.UK <- median(nationality$med[which(nationality$Nationality=="England"|nationality$Nationality=="Wales"|nationality$Nationality=="Scotland"|nationality$Nationality=="Republic of Ireland")])
-
-# the number of players in each part of the UK will be of use during the next question:
-Wales <- nationality$Ones[which(nationality$Nationality=="Wales")]
-Ireland <-nationality$Ones[which(nationality$Nationality=="Republic of Ireland")]
-Scotland <-nationality$Ones[which(nationality$Nationality=="Scotland")]
-England <- nationality$Ones[which(nationality$Nationality=="England")]
 
 # add a row of united kingdom with the median.
 nationality <- add_row(.data = nationality, Nationality = "United Kingdom", med = median.UK)
@@ -419,36 +423,31 @@ sPDF  <- joinCountryData2Map(dF = nationality, joinCode = "NAME", nameJoinColumn
 
 #ploting the world map:
 colourPalette <- brewer.pal(7,'RdYlGn') # Choosing a color
-mapCountryData(sPDF,nameColumnToPlot="med",colourPalette=colourPalette,catMethod='fixedWidth', mapTitle = "d. median of Potential by country")
+mapCountryData(sPDF,nameColumnToPlot="med",colourPalette=colourPalette,catMethod='fixedWidth', mapTitle = "d. median potential of players by country")
 ```
 
 e. Repeat the above analysis but this time display a world map where each country is colored by the median ratio of potential to value of players. Find an under-valued country you’d recommend to travel to (i.e. a country with cheap players compared to their potential average quality).
 ```{r}
 #  add a column of the ratio of potential to value of players.
-# fifa_players <-  mutate(fifa_players , ratio_med = Value/Potential)
-# nationality.ratio <- aggregate(ratio_med ~ Nationality, data = fifa_players, FUN = median)
-# 
-# # median United kingdom we'll have to median the players in each part 
-# ratio_med.UK <- median(nationality.ratio$med[which(nationality.ratio$Nationality=="England"|nationality.ratio$Nationality=="Wales"|nationality.ratio$Nationality=="Scotland"|nationality.ratio$Nationality=="Republic of Ireland")])
-# 
-# Wales <- nationality.ratio$ratio_med[which(nationality.ratio$Nationality=="Wales")]
-# Ireland <-nationality.ratio$ratio_med[which(nationality.ratio$Nationality=="Republic of Ireland")]
-# Scotland <-nationality.ratio$ratio_med[which(nationality.ratio$Nationality=="Scotland")]
-# England <- nationality.ratio$ratio_med[which(nationality.ratio$Nationality=="England")]
-# 
-# 
-# # add a row of united kingdom with the median.
-# nationality.ratio <- add_row(.data = nationality.ratio, Nationality = "United Kingdom", ratio_med = ratio_med.UK)
-# 
-# # deleting the rows of England, Wales, Scotland and Republic of Ireland
-# nationality.ratio <- nationality.ratio[-which(nationality.ratio$Nationality=="England"|nationality.ratio$Nationality=="Wales"| nationality.ratio$Nationality=="Scotland"|nationality.ratio$Nationality=="Republic of Ireland"),]
-# 
-# #creating the map
-# sPDF  <- joinCountryData2Map(dF = nationality.ratio, joinCode = "NAME", nameJoinColumn = "Nationality",verbose=F) # Prepare data to plot
-# 
-# #ploting the world map:
-# colourPalette <- brewer.pal(7,'RdYlGn') # Choosing a color
-# mapCountryData(sPDF,nameColumnToPlot="ratio_med",colourPalette=colourPalette,catMethod='fixedWidth', mapTitle = "d. median ratio of potential to value of players by country")
+fifa.3e <- fifa
+fifa.3e <-  mutate(fifa.3e , ratio_med = Value/Potential)
+nationality.ratio <- aggregate(ratio_med ~ Nationality, data = fifa.3e, FUN = median)
+
+# median United kingdom we'll have to median the players in each part
+ratio_med.UK <- median(nationality.ratio$ratio_med[which(nationality.ratio$Nationality=="England"|nationality.ratio$Nationality=="Wales"|nationality.ratio$Nationality=="Scotland"|nationality.ratio$Nationality=="Republic of Ireland")])
+
+# add a row of united kingdom with the median.
+nationality.ratio <- add_row(.data = nationality.ratio, Nationality = "United Kingdom", ratio_med = ratio_med.UK)
+
+# deleting the rows of England, Wales, Scotland and Republic of Ireland
+nationality.ratio <- nationality.ratio[-which(nationality.ratio$Nationality=="England"|nationality.ratio$Nationality=="Wales"| nationality.ratio$Nationality=="Scotland"|nationality.ratio$Nationality=="Republic of Ireland"),]
+
+#creating the map
+sPDF  <- joinCountryData2Map(dF = nationality.ratio, joinCode = "NAME", nameJoinColumn = "Nationality",verbose=F) # Prepare data to plot
+
+#ploting the world map:
+colourPalette <- brewer.pal(7,'RdYlGn') # Choosing a color
+mapCountryData(sPDF,nameColumnToPlot="ratio_med",colourPalette=colourPalette,catMethod='fixedWidth', mapTitle = "e. median ratio of potential to value of players by country")
 ```
 
 
