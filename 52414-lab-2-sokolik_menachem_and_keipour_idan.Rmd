@@ -470,72 +470,17 @@ perform_corlation["average"] <- (perform_corlation$Overall+perform_corlation$Pot
 
 knitr::kable(top_n(perform_corlation,10,average) %>% select(average) %>% arrange(desc(average)))
 ```
+
 c
-
-fifa<-na.omit(fifa_players)
-fifa_players <- fifa
-fifa_players_info <- fifa[,c(1:11)] # players general info 
-fifa_players_attribures <- fifa[,c(1,12:45, 6)] # players different skills. Add overall
-fifa_players_positions <- fifa[,c(1,46:72,6,7)] # players ability at different positions . Add overall 
-fifa_players_indicators <- fifa[,c(1,6,7,10,11)] # players general ability 
-fifa_players_positions_subset<-fifa_players_positions[,-c(13:17)]  # hard-coded solution: how were these positions selected?
-
 ```{r}
-fifa_players_positions_subset = left_join(fifa_players_positions,fifa_players_info[,c(1,2)],"ID")
-fifa_players_positions_subset <-fifa_players_positions_subset[!grepl("GK", fifa_players_positions_subset$Preferred.Positions),]
-
-team <- function(df=fifa, positions){
-  team_bast <- data.frame()
-  for (i in positions){
-    column <- which(names(df)== i)
-    player.name <- df[which(df[, column] == max(df[,column])),]
-  
-  
-  
-  
-  
-  
-team_selection <- function(df=fifa, positions){
-  #param df: fifa18 football dataset.
-  #param posotions: positions to choose from.
-  #return : team that the players chosen are the best in their individual position and in such a way that maximize the team's overall average score.
-  team = data.frame()
-  for (pos in positions) {
-    col_number = which(names(df)==pos)
-    Candidates = df[which(df[,col_number]==max(df[,col_number]) ),] # first, the players chosen are the best in their individual position.
-    if (nrow(Candidates)>1) {
-      Candidates = Candidates[which.max(Candidates$Overall),] # maximize the team's overall average score
-    }
-    df = df[-which(df$ID == Candidates$ID),] # Don't choose a player twice
-    
-    if (nrow(team)==0) {
-      team = Candidates
-    }
-    else{
-      team = rbind(team,Candidates)
-    }
-  }
-  return(team)
-}
-
-vec_names <- c("CAM", "CB", "CM", "RB", "RW", "ST")
-
-# In order to see the best players of each skill, we'll create a blank DF and insert sorted column for each skill:
-team_options <- as.data.frame(matrix(ncol = 6, nrow = 5))
-team_options_numbers <- as.data.frame(matrix(ncol = 6, nrow = 5))
-
-# Running overa ll the skills, sorting the best players, and inserting the columns to the names and numbers data frames:
-for(i in 1:6){
-  current_name <- vec_names[i]
-  current_col <- fifa_players[,current_name]
-  temp_df <- data.frame(fifa_players$Name, current_col) %>% arrange(desc(current_col))
-  team_options[,i] <- temp_df[1:5,1]
-  team_options_numbers[,i]<- temp_df[1:5,2]
-}
-
-# changing names for the data frames columns:
-colnames(team_options) <- vec_names
-colnames(team_options_numbers) <- vec_names
+# fifa_players_positions_subset = left_join(fifa_players_positions,fifa_players_info[,c(1,2)],"ID")
+# fifa_players_positions_subset <-fifa_players_positions_subset[!grepl("GK", fifa_players_positions_subset$Preferred.Positions),]
+# 
+# team <- function(df=fifa, positions){
+#   team_bast <- data.frame()
+#   for (i in positions){
+#     column <- which(names(df)== i)
+#     player.name <- df[which(df[, column] == max(df[,column])),]
 
 ```
 
