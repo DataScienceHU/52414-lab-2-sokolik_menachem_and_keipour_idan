@@ -451,6 +451,44 @@ mapCountryData(sPDF,nameColumnToPlot="ratio_med",colourPalette=colourPalette,cat
 ```
 
 
+
+## Q3. Correlations Analysis
+```{r}
+
+
+position_corlation <- cor(fifa_players_positions[-c(1,28:30)])
+corrplot(position_corlation,order = "hclust",tl.col = "black",tl.cex = 0.8,title = "position corrlation",cex.main = 0.9)
+position_corlation <- cor(fifa_players_positions[-c(1,28:30)])
+
+corrplot(position_corlation,order = "hclust",tl.col = "black",tl.cex = 0.8,title = "position corrlation",cex.main = 1.5, cl.cex=0.8, pch.cex = 0.6,type = "lower", mar=c(0, 0, 1, 0))
+
+attrib_corlation <-  cor(fifa_players_attribures[-c(1,13:17)])
+corrplot(attrib_corlation,order = "hclust",tl.col = "black",tl.cex = 0.8,title = "ttributes corrlation",cex.main = 1.5, cl.cex=0.8, pch.cex = 0.6,type = "lower", mar=c(0, 0, 1, 0))
+```
+
+
+b
+```{r}
+perform_corlation <- cor(fifa_players_attribures[-c(1,36)],fifa_players_indicators[-1])
+corrplot(perform_corlation,tl.col = "black",tl.cex = 0.7,title = "performance corrlation",cex.main = 1.5, mar=c(0, 0, 1, 0), cl.ratio = 1, cl.cex=0.8)
+
+perform_corlation <- as.data.frame(perform_corlation)
+perform_corlation["average"] <- (perform_corlation$Overall+perform_corlation$Potential+perform_corlation$Value+ perform_corlation$Wage)/4
+
+knitr::kable(top_n(perform_corlation,10,average) %>% select(average) %>% arrange(desc(average)))
+```
+answer to Q4 e
+
+```{r}
+model <- lm(Overall~Wage+Age,data = fifa_players_info)
+fifa_players_info["prediction"] <- predict(model,fifa_players_info)
+fifa_players_info["difference"] <- fifa_players_info$Overall - fifa_players_info$prediction
+
+knitr::kable(top_n(fifa_players_info,10,difference) %>% select(Name,Overall,prediction,difference) %>% arrange(desc(difference)))
+```
+The players on the list are worth buying because the salary they are currently receiving does not match their value. That is, according to their current salary level, we would think that these are less good players than they really are, so they may agree to move to a team if they are offered a higher salary.
+
+
 ## Q4. Fix Problematic Plots.
 a.
 The purpose of the plots is to show of different nationalities in each club and brings the eight highest in terms of the variety of players.
