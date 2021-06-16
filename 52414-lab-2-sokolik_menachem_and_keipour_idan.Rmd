@@ -166,17 +166,17 @@ knitr::kable(skewness(players.Overall), col.names = NULL, caption = "The skewnes
 Can be measured with the third standardized moment (skewness).
 $\hat\mu_3=\frac{\frac{1}{n}\sum _{i=1}^n\left(x_i-x\right)^3\:}{\left[\frac{1}{n}\sum \:_{i=1}^n\left(x_i-x\right)^2\:\right]^{1.5}}$
 
-For a symmetric (e.g. Normal) distribution: $־¼_3=0$.
-Positive (negative) $־¼_3$ indicates long right (left) tail - therefor, theree is a long right tail.
+For a symmetric (e.g. Normal) distribution: $μ_3=0$.
+Positive (negative) $μ_3$ indicates long right (left) tail - therefor, theree is a long right tail.
 
 ```{r}
 zero.Overall <-  fifa_players$WaOverallge[fifa_players$Overall == 0]
 knitr::kable(kurtosis(players.Overall) , col.names = NULL, caption = "The kurtosis is") # fat tails of players.Overall
 ```
-The kurtosis is defined as: $־÷ג‰¡־¼_4גˆ’3$.
+The kurtosis is defined as: $κ≡μ_4−3$.
 $\hat\mu_4 =\frac{\frac{1}{n}\sum _{i=1}^n\left(x_i-x\right)^4\:}{\left[\frac{1}{n}\sum \:_{i=1}^n\left(x_i-x\right)^2\:\right]^2}$
-For the Normal distribution: $־÷=0$.
-Positive (negative) $־÷$ indicates long (short) tails compared to Normal - therefor, there is a short left tail.
+For the Normal distribution:$κ=0$.
+Positive (negative) $κ$ indicates long (short) tails compared to Normal - therefor, there is a short left tail.
 
 ```{r}
 #better described by a Normal distribution?
