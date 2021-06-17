@@ -305,7 +305,7 @@ fifa_players <-  mutate(fifa_players ,diff_Overall_Potential = Potential - Overa
 Diff_Overall_Potential <- aggregate(fifa_players$diff_Overall_Potential, by = list(Age), FUN = mean)
 # Make a plot as required.
 ggplot(data = subset(Diff_Overall_Potential,Group.1<=35),aes(x=Group.1,y=x))+
-  geom_line() +geom_point() + labs(title="2.b. average Difference between a playerג€™s overall ability to potential ability by age") +
+  geom_line() +geom_point() + labs(title="2.b. average Difference between a players overall ability to potential ability by age") +
   xlab("Age")+
   ylab("Potential vs Overall") + theme_light() + geom_vline(xintercept = c(16,25), color = "#00Bfc4") + geom_text(x=20, y=2, label="players for future \n development",size = 4, family="mono")
 ```
