@@ -326,8 +326,6 @@ ggplot(data = potential, aes(y = Value, x=Potential)) + geom_point() +
   geom_smooth(method = "lm", formula= y~x) + theme_light()
 ```
 
-Find the 10 most-undervalued players.
-
 ```{r}
 # add_residuals of potential.fit
 potential <-  mutate(potential , resid = round(resid(potential.fit), 3))
@@ -336,7 +334,7 @@ potential <-  mutate(potential , predicted_Value  = round(potential.fit$fitted.v
 # Find table with best residuals 
 potential.fit$coefficients
 #knitr::kable(potential %>% arrange(desc(potential$predicted_Value/potential$Value)) %>% select(Name, Age, Potential, Overall, resid, Value, predicted_Value) %>% head(10))
-knitr::kable(potential %>% arrange((resid)) %>% select(Name, Age, Potential, Overall, resid, Value, predicted_Value) %>% head(10))
+knitr::kable(potential %>% arrange((resid)) %>% select(Name, Age, Potential, Overall, resid, Value, predicted_Value) %>% head(10), caption = "The ten most-undervalued players.")
 ```
 
 The calculation is done by retrieving resid from the data. Whereas we are looking for the ten players who have the most-undervalued. Since $e_i\:=Y_i-\hat{Y\:_i\:}$So it follows that the smaller the residual i.e. the one with the largest negative value then it means that the player gets little money in relation to the price if he would have received according to the predicted value. That is, the player with the smallest resid is the most-undervalued player.
@@ -396,7 +394,7 @@ Find an under-valued country you'd recommend to travel to (i.e. a country with c
 ```{r}
 tmp <- merge(nationality.ratio,nationality)
 names(tmp)<-c("Nationality","ratio potential to value", "median of potential")
-knitr::kable(head(tmp[order(tmp$`ratio potential to value`,tmp$`median of potential`,decreasing = T),],10))
+knitr::kable(head(tmp[order(tmp$`ratio potential to value`,tmp$`median of potential`,decreasing = T),],10), caption = "the ten under-valued country you'd recommend to travel.")
 ```
 
 a country with cheap and high-potential players will result in a high value of the median ratio of potential to value of players. There is a certain trade-off, if I prefer a country with the highest ratio then I prefer to send my boss to San Marino. Otherwise, if I prefer a country with the median of the highest potential then I will send the my boss to Thailand, so the ratio is still somewhat high.
@@ -439,6 +437,8 @@ and list them in a table.
 ![Example of a Spider chart](https://i1.wp.com/statsbomb.com/wp-content/uploads/2014/01/Messi2013_NPG.jpg)
 
 ## Solution Q3. Correlations Analysis
+
+a. Calculate the correlation between players' ability in each pair of positions and show a heatmap correlation-plot of the correlations' matrix. What three positions have the *least* average correlations with other skills?
 ```{r}
 position_corlation <- cor(fifa_players_positions[-c(1,28:30)])
 
@@ -451,7 +451,8 @@ corrplot(attrib_corlation,order = "hclust",tl.col = "black",tl.cex = 0.4,title =
 We can see that the three positions which have the least average correlations with other skills are : "RCB","CB","LCB".
 In edition, Strength and Jumping seems to be least correlated with other skills.
 
-b.
+b. Show a correlation-plot of players' *34* skill levels 
+(`Acceleration`, ..., `Volleys`) vs. these four indicators. Find the *10* skills with the highest *average* correlation with the four inidcators and list them in a table.
 ```{r}
 perform_corlation <- cor(fifa_players_attribures[-c(1,36)],fifa_players_indicators[-1])
 corrplot(perform_corlation,tl.col = "black",tl.cex = 0.7,title = "performance corrlation",cex.main = 1.2, mar=c(0, 0, 1, 0), cl.ratio = 1, cl.cex=0.8)
@@ -462,7 +463,7 @@ perform_corlation["average"] <- (perform_corlation$Overall+perform_corlation$Pot
 
 These are the 10 skills with the highest average correlation with "overall","potential","wage" and "value":
 ```{r}
-knitr::kable(top_n(perform_corlation,10,average) %>% select(average) %>% arrange(desc(average)))
+knitr::kable(top_n(perform_corlation,10,average) %>% select(average) %>% arrange(desc(average)), caption = "The ten skills with the highest average correlation.")
 ```
 
 c
@@ -470,14 +471,48 @@ c
 fifa_players_positions_subset <-  left_join(fifa_players_info[,c(1,2)], fifa_players_positions,"ID")
 positions <- fifa_players_positions_subset[3:28]
 
-answer = data.frame(Name = NA, position = NA,Overall = NA)
+best = data.frame(Name = NA, position = NA,Overall = NA)
 for (i in 3:28) {
   a <- (fifa_players_positions_subset %>% top_n(1,fifa_players_positions_subset[i])) %>% select(Name,colnames(fifa_players_positions_subset[i]),Overall) 
   colnames(a) <- c("Name","position","Overall")
-  answer <- data.frame(rbind(as.matrix(answer),as.matrix(a)))
+  best <- data.frame(rbind(as.matrix(best),as.matrix(a)))
 }
 gk <- filter(fifa_players_positions_subset,Preferred.Positions=="GK ") 
-gk <- gk %>% select(Name,Overall) %>% arrange(desc(Overall))
+gk <- gk %>% select(Name,Overall) %>% arrange(desc(Overall)) %>% head(1)
+team <- rbind(best %>% filter(duplicated(Name) == FALSE) %>% arrange(desc(Overall)) %>% head(10) %>% select(Name,Overall),gk)
+team <- transform(team, Overall = as.numeric(Overall))
+average  <- data.frame(Name = "Team average" ,Overall = mean(team$Overall))
+team <- rbind(team,average )
+knitr::kable(team)
+```
+
+```{r}
+fifa_at <- left_join(fifa_players_info[,c(1,2)], fifa_players_attribures[-36],"ID")
+
+player_name <- team[1,1]
+colum <- colnames(fifa_players_attribures[-c(1,36)])
+first_pleyer <- fifa_at %>% filter(Name== player_name) %>% select(all_of(colum)) %>% as.matrix() %>% t() %>% as.data.frame()
+top_att <- first_pleyer %>% arrange(desc(V1)) %>% head(10)
+colnames(top_att) <- player_name
+top_att <- cbind(row.names(top_att),top_att)
+chartJSRadar(top_att)
+```
+
+```{r}
+s.plot <- function(i){
+  player_name <- team[i,1]
+  colum <- colnames(fifa_players_attribures[-c(1,36)])
+  first_pleyer <- fifa_at %>% filter(Name== player_name) %>% select(all_of(colum)) %>% as.matrix() %>% t() %>% as.data.frame()
+  top_att <- first_pleyer %>% arrange(desc(V1)) %>% head(10)
+  colnames(top_att) <- player_name
+  top_att <- cbind(row.names(top_att),top_att)
+  return(chartJSRadar(top_att))}
+s.plot(1)
+s.plot(2)
+s.plot(3)
+s.plot(4)
+s.plot(5)
+s.plot(11)
 ```
 
 d. We are interested in determining how the player's abilities in different positions changes with age. 
@@ -501,14 +536,15 @@ ggplot(data=skills_Age, aes(x=Age, y=value, group=variable)) +
   facet_wrap(~variable)+ theme(legend.position="none") 
 ```
 
-e.
+e. Find the 10 players with the highest difference between their wage performance level and the regression model prediction, and list them in a table.
 ```{r}
 model <- lm(Overall~Wage+Age,data = fifa_players_info)
 fifa_players_info["prediction"] <- predict(model,fifa_players_info)
 fifa_players_info["difference"] <- fifa_players_info$Overall - fifa_players_info$prediction
 
-knitr::kable(top_n(fifa_players_info,10,difference) %>% select(Name,Overall,prediction,difference) %>% arrange(desc(difference)))
+knitr::kable(top_n(fifa_players_info,10,difference) %>% select(Name,Overall,prediction,difference) %>% arrange(desc(difference)), caption = "The ten players with the highest difference between their wage performance level.")
 ```
+
 The players on the list are worth buying because the salary they are currently receiving does not match their value. That is, according to their current salary level, we would think that these are less good players than they really are, so they may agree to move to a team if they are offered a higher salary.
 
 
