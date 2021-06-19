@@ -197,11 +197,11 @@ Since the average of its continent was greater than the overall average, then it
 Better seen by boxplot.
 ```{r}
 # by boxplot:
- ggplot(data = fifa_players,aes(x=Continent,y = Overall))+
+ ggplot(data = fifa_players,aes(x=Continent,y = Overall, color=Continent ))+
   geom_boxplot()+
   theme_light()+
   ylab("Overall")+
-  coord_flip()+
+  coord_flip()+ theme(legend.position="none") +
   labs(title="b. Players Overall Quality by Continent")
 ```
 
@@ -317,24 +317,22 @@ We expect to find players for future development between the ages of 16 and 25, 
 c. Show a scatter plot of these players comparing their `potential` ability (x-axis) and current `value` (y-axis).
 ```{r}
 # In order to get the required ranges
-potential <- subset(fifa_players, Overall>70 & Age<=21) %>% filter(Value !=0)
+value.by.potential <- subset(fifa_players, Overall>70 & Age<=21) %>% filter(Value !=0)
 # Creating a linear model:
-potential.fit <- lm(Value ~ Potential, data = potential)
+value.by.potential.fit <- lm(Value ~ Potential, data = value.by.potential)
 # plotting wage and potential for these young players:
-ggplot(data = potential, aes(y = Value, x=Potential)) + geom_point() +
-  ggtitle(label = "c. Potential VS Value for players under 21") + 
+ggplot(data = value.by.potential, aes(y = Value, x=Potential)) + geom_point() +
+  ggtitle(label = "c.Value  VS Potential for players under 21") + 
   geom_smooth(method = "lm", formula= y~x) + theme_light()
 ```
 
 ```{r}
-# add_residuals of potential.fit
-potential <-  mutate(potential , resid = round(resid(potential.fit), 3))
+# add_residuals of value.by.potential.fit
+value.by.potential <-  mutate(value.by.potential , resid = round(resid(value.by.potential.fit), 3))
 #potential <-  mutate(potential , difference = round(predicted_Value- Value, 3)) # difference
-potential <-  mutate(potential , predicted_Value  = round(potential.fit$fitted.values, 3))
+value.by.potential <-  mutate(value.by.potential , predicted_Value  = round(value.by.potential.fit$fitted.values, 3))
 # Find table with best residuals 
-potential.fit$coefficients
-#knitr::kable(potential %>% arrange(desc(potential$predicted_Value/potential$Value)) %>% select(Name, Age, Potential, Overall, resid, Value, predicted_Value) %>% head(10))
-knitr::kable(potential %>% arrange((resid)) %>% select(Name, Age, Potential, Overall, resid, Value, predicted_Value) %>% head(10), caption = "The ten most-undervalued players.")
+knitr::kable(value.by.potential %>% arrange((resid)) %>% select(Name, Age, Overall, Potential, resid, Value, predicted_Value) %>% head(10), caption = "The ten most-undervalued players.")
 ```
 
 The calculation is done by retrieving resid from the data. Whereas we are looking for the ten players who have the most-undervalued. Since $e_i\:=Y_i-\hat{Y\:_i\:}$So it follows that the smaller the residual i.e. the one with the largest negative value then it means that the player gets little money in relation to the price if he would have received according to the predicted value. That is, the player with the smallest resid is the most-undervalued player.
@@ -368,8 +366,8 @@ e. Repeat the above analysis but this time display a world map where each countr
 ```{r}
 #  add a column of the ratio of potential to value of players.
 fifa.3e <- fifa_players
-fifa.3e <-  mutate(fifa.3e , ratio_med = Potential/(Value/1000))
-nationality.ratio <- aggregate(ratio_med ~ Nationality, data = fifa.3e, FUN = median) %>% filter(ratio_med <1)
+fifa.3e <-  mutate(fifa.3e , ratio_med = Value/Potential)
+nationality.ratio <- aggregate(ratio_med ~ Nationality, data = fifa.3e, FUN = median)
 
 # median United kingdom we'll have to median the players in each part
 ratio_med.UK <- median(nationality.ratio$ratio_med[which(nationality.ratio$Nationality=="England"|nationality.ratio$Nationality=="Wales"|nationality.ratio$Nationality=="Scotland"|nationality.ratio$Nationality=="Republic of Ireland")])
@@ -392,12 +390,19 @@ mapCountryData(sPDF,nameColumnToPlot="ratio_med",colourPalette=colourPalette,cat
 Find an under-valued country you'd recommend to travel to (i.e. a country with cheap players compared to their `potential` average quality). 
 
 ```{r}
-tmp <- merge(nationality.ratio,nationality)
-names(tmp)<-c("Nationality","ratio potential to value", "median of potential")
-knitr::kable(head(tmp[order(tmp$`ratio potential to value`,tmp$`median of potential`,decreasing = T),],10), caption = "the ten under-valued country you'd recommend to travel.")
+ex3d.1 <- aggregate(Potential~ Nationality, data = fifa.3e, FUN = mean)
+ex3d.2 <- aggregate(Value~ Nationality, data = fifa.3e, FUN = mean)
+tmp <- merge(ex3d.1,ex3d.2)
+ex3d.3 <- tmp$Value/tmp$Potential
+check <- aggregate(ratio_med ~ Nationality, data = fifa.3e, FUN = mean)
+
+names(check)<-c("Nationality","ratio potential to value")
+knitr::kable(head(check[order(check$`ratio potential to value`,decreasing = T),],10), caption = "the ten under-valued country you'd recommend to travel.")
+
+
 ```
 
-a country with cheap and high-potential players will result in a high value of the median ratio of potential to value of players. There is a certain trade-off, if I prefer a country with the highest ratio then I prefer to send my boss to San Marino. Otherwise, if I prefer a country with the median of the highest potential then I will send the my boss to Thailand, so the ratio is still somewhat high.
+List of the ten places I would recommend visiting on average.
 
 
 ## Q3. Correlations Analysis (30 pt)
@@ -488,14 +493,13 @@ knitr::kable(team)
 
 ```{r}
 fifa_at <- left_join(fifa_players_info[,c(1,2)], fifa_players_attribures[-36],"ID")
-
-player_name <- team[1,1]
-colum <- colnames(fifa_players_attribures[-c(1,36)])
-first_pleyer <- fifa_at %>% filter(Name== player_name) %>% select(all_of(colum)) %>% as.matrix() %>% t() %>% as.data.frame()
-top_att <- first_pleyer %>% arrange(desc(V1)) %>% head(10)
-colnames(top_att) <- player_name
-top_att <- cbind(row.names(top_att),top_att)
-chartJSRadar(top_att)
+# player_name <- team[1,1]
+# colum <- colnames(fifa_players_attribures[-c(1,36)])
+# first_pleyer <- fifa_at %>% filter(Name== player_name) %>% select(all_of(colum)) %>% as.matrix() %>% t() %>% as.data.frame()
+# top_att <- first_pleyer %>% arrange(desc(V1)) %>% head(10)
+# colnames(top_att) <- player_name
+# top_att <- cbind(row.names(top_att),top_att)
+# chartJSRadar(top_att)
 ```
 
 ```{r}
@@ -507,6 +511,7 @@ s.plot <- function(i){
   colnames(top_att) <- player_name
   top_att <- cbind(row.names(top_att),top_att)
   return(chartJSRadar(top_att))}
+
 s.plot(1)
 s.plot(2)
 s.plot(3)
@@ -535,9 +540,8 @@ ggplot(data=skills_Age, aes(x=Age, y=value, group=variable)) +
   facet_wrap(~variable)+ theme(legend.position="none") 
 ```
 
-Can see that a goalkeeper's skills are on a steady rise which reaches its peak at 35 years old.
-Many skills can be seen which begin to decline further as the skills of a delicate goalie rise.
-Skills that peak at a young age is Balance, which at a young age is at its peak and over time consistently declines. Also, there are various skills that reach a peak at a slightly more advanced but young age for example Acceleration and agility.
+we can from the plot that the skills that peaks at the youngest ages are: Balance, Acceleration, Agility.
+The skills that peaks at the oldest ages are: Composure, Free kick accuracy, Reactions, Strength and all the different skills of GK.
 
 e. Find the 10 players with the highest difference between their wage performance level and the regression model prediction, and list them in a table.
 ```{r}
