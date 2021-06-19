@@ -119,7 +119,7 @@ fifa_players <- fifa
 fifa_players_info <- fifa[,c(1:11)] # players general info 
 fifa_players_attribures <- fifa[,c(1,12:45, 6)] # players different skills. Add overall
 fifa_players_positions <- fifa[,c(1,46:72,6,7)] # players ability at different positions . Add overall 
-fifa_players_indicators <- fifa[,c(1,6,7,10,11)] # players general ability 
+fifa_players_indicators <- fifa[,c(1,6,7,10,11)] # players general ability  
 ```
 
 
@@ -521,8 +521,7 @@ Which skills peak at youngest/oldest ages?
 
 ```{r}
 # Creating a data frame with the ages and the skills from which we'd calculate means for age:
-skills <- left_join(fifa_players[,c(1,3)],fifa_players_attribures[,-c(13:17)],"ID")
-skills <- filter(skills[,-1])
+skills<-fifa_players[,c(3,12:45)]
 skills <- filter(.data = skills, Age <= 35)
 # mean function on skills
 mean_of_skills <- aggregate(. ~ Age, data = skills, FUN = mean)
@@ -535,6 +534,10 @@ ggplot(data=skills_Age, aes(x=Age, y=value, group=variable)) +
   theme(plot.title = element_text(hjust = 0.5))+ 
   facet_wrap(~variable)+ theme(legend.position="none") 
 ```
+
+Can see that a goalkeeper's skills are on a steady rise which reaches its peak at 35 years old.
+Many skills can be seen which begin to decline further as the skills of a delicate goalie rise.
+Skills that peak at a young age is Balance, which at a young age is at its peak and over time consistently declines. Also, there are various skills that reach a peak at a slightly more advanced but young age for example Acceleration and agility.
 
 e. Find the 10 players with the highest difference between their wage performance level and the regression model prediction, and list them in a table.
 ```{r}
