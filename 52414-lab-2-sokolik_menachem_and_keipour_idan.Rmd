@@ -163,7 +163,7 @@ Can be measured with the third standardized moment (skewness).
 $\hat\mu_3=\frac{\frac{1}{n}\sum _{i=1}^n\left(x_i-x\right)^3\:}{\left[\frac{1}{n}\sum \:_{i=1}^n\left(x_i-x\right)^2\:\right]^{1.5}}$
 
 For a symmetric (e.g. Normal) distribution: $μ_3=0$.
-Positive (negative) $μ_3$ indicates long right (left) tail - therefor, theree is a long right tail.
+Positive  $μ_3$ indicates long right tail - therefor, theree is a long right tail.
 
 ```{r}
 zero.Overall <-  fifa_players$WaOverallge[fifa_players$Overall == 0]
@@ -172,7 +172,7 @@ knitr::kable(kurtosis(players.Overall) , col.names = NULL, caption = "The kurtos
 The kurtosis is defined as: $κ≡μ_4−3$.
 $\hat\mu_4 =\frac{\frac{1}{n}\sum _{i=1}^n\left(x_i-x\right)^4\:}{\left[\frac{1}{n}\sum \:_{i=1}^n\left(x_i-x\right)^2\:\right]^2}$
 For the Normal distribution:$κ=0$.
-Positive (negative) $κ$ indicates long (short) tails compared to Normal - therefor, there is a short left tail.
+negative $κ$ indicates short tails compared to Normal - therefor, there is a short left tail.
 
 ```{r}
 #better described by a Normal distribution?
@@ -192,9 +192,10 @@ ggplot(data = fifa_players,aes(x= Overall)) + geom_density(aes(fill= factor(Cont
   facet_wrap(~ Continent, ncol = 3) + geom_vline(xintercept = mean(Overall), col= "red", lwd = 0.5) 
 ```
 
-Since the average of its continent was greater than the overall average, then it can be said that the best continent is SOuth America, Africa.
+Since the average of its continents was greater than the overall average, then it can be said that the best continents are South America and Africa.
 
-Better seen by boxplot.
+
+Better seen by boxplot:
 ```{r}
 # by boxplot:
  ggplot(data = fifa_players,aes(x=Continent,y = Overall, color=Continent ))+
@@ -205,7 +206,7 @@ Better seen by boxplot.
   labs(title="b. Players Overall Quality by Continent")
 ```
 
-The graphs shows that on average the South American players are better than the rest of the players in the world, and in addition the players from Antarctica are the worst on average.
+The plots shows that on average the South American players are better than the rest of the players in the world, and in addition the players from Antarctica are the worst on average.
 
 
 c. Make a plot showing the density of players' `value` distribution. <br>
@@ -257,8 +258,9 @@ knitr::kable(ten.youngest.teams, caption = "Ten youngest teams in terms of avera
 ```
 ```{r}
 ten.oldest.teams <- head(arrange(ten.youngest, desc(average_Age)),10)
-names(ten.youngest.teams)<-c("Team","average Age")
-knitr::kable(ten.youngest.teams, caption = "Ten oldest teams in terms of average players age.")
+names(ten.oldest.teams)<-c("Team","average Age")
+knitr::kable(ten.oldest.teams, caption = "Ten oldest teams in terms of average players age.")
+
 ```
 
 ## Q2. Scouting Report (30 pt)
@@ -289,13 +291,14 @@ P <- ggplot(data= subset(average_Ponalties_Age, Group.1<=35), aes(x=Group.1,y=x)
 P
 ```
 
-b. Plot the average difference between a playerג€™s overall ability to potential ability as a function of age, up to age 35. At what ages should we expect to find players for future development based on this graph?
+b. Plot the average difference between a players overall ability to potential ability as a function of age, up to age 35. At what ages should we expect to find players for future development based on this graph?
 
 ```{r}
 average_Overall_Age <- aggregate(Overall, by = list(Age), FUN = mean)
-P + geom_line(data= subset(average_Overall_Age, Group.1<=35), aes(x=Group.1,y=x), color ="red") + geom_point(data= subset(average_Overall_Age, Group.1<=35), aes(x=Group.1,y=x)) + geom_vline(xintercept = c(16,25), color = "#00Bfc4") + geom_text(x=20, y=70 , label="players for future \n development",size = 4, family="mono") + geom_text(x=33.5, y=75.5, label="red line is \n Overall average ",size = 3, family="mono", color = "red") +
+P + geom_line(data= subset(average_Overall_Age, Group.1<=35), aes(x=Group.1,y=x), color ="red") + geom_point(data= subset(average_Overall_Age, Group.1<=35), aes(x=Group.1,y=x)) + geom_vline(xintercept = c(16), color = "#00Bfc4") + geom_text(x=20, y=70 , label="players for future \n development",size = 4, family="mono") + geom_text(x=33.5, y=75.5, label="red line is \n Overall average ",size = 3, family="mono", color = "red") +
   geom_text(x=33.5, y=73, label="black line is \n Potential average ",size = 3, family="mono", color = "black") 
 ```
+
 In order to see the clear trends a plot was made which was performed on the plot from the previous section. We will now perform a plot which is performed on the difference between the two.
 
 ```{r}
@@ -307,12 +310,13 @@ Diff_Overall_Potential <- aggregate(fifa_players$diff_Overall_Potential, by = li
 ggplot(data = subset(Diff_Overall_Potential,Group.1<=35),aes(x=Group.1,y=x))+
   geom_line() +geom_point() + labs(title="2.b. average Difference between a players overall ability to potential ability by age") +
   xlab("Age")+
-  ylab("Potential vs Overall") + theme_light() + geom_vline(xintercept = c(16,25), color = "#00Bfc4") + geom_text(x=20, y=2, label="players for future \n development",size = 4, family="mono")
+  ylab("Potential vs Overall") + theme_light() + geom_vline(xintercept = c(16), color = "#00Bfc4") + geom_text(x=20, y=2, label="players for future \n development",size = 4, family="mono")
 ```
  
 We can see a pattern: the older the player, the smaller the difference between the player's general ability and the potential ability. This may be because at the young age of 16 players have a wide range of potentials, some may be average and some may be promising - which means a high variance of differences.
 The older the player - the more he exploits his potential - therefore - the smaller the difference.
-We expect to find players for future development between the ages of 16 and 25, this is because according to the graph there is a difference of 2.5 units (or more) the difference between the potential and the current skill.
+We see that when the player is under 30 his skills are still on a growth trend. That means until this age we can find players with potential to improve. From the age of 30 the skills of the players are stable.
+Let us note that the younger the player, the greater his growth potential, which means that the growth of a player from the age of 16 to 17 is much greater than his growth from the age of 29 to 30. Therefore, we prefer to acquire as young a player as possible.
 
 c. Show a scatter plot of these players comparing their `potential` ability (x-axis) and current `value` (y-axis).
 ```{r}
@@ -402,7 +406,7 @@ knitr::kable(head(check[order(check$`ratio potential to value`,decreasing = T),]
 
 ```
 
-List of the ten places I would recommend visiting on average.
+List of the ten places I would recommend to scout there because there is a high potential for good players at a low price.
 
 
 ## Q3. Correlations Analysis (30 pt)
@@ -443,7 +447,7 @@ and list them in a table.
 
 ## Solution Q3. Correlations Analysis
 
-a. Calculate the correlation between players' ability in each pair of positions and show a heatmap correlation-plot of the correlations' matrix. What three positions have the *least* average correlations with other skills?
+a. Calculate the correlation between players' ability in each pair of positions and show a heatmap correlation-plot of the correlations' matrix. What three positions have the *least* average correlations with other positions?
 ```{r}
 position_corlation <- cor(fifa_players_positions[-c(1,28:30)])
 
@@ -453,7 +457,7 @@ attrib_corlation <-  cor(fifa_players_attribures[-c(1,13:17)])
 corrplot(attrib_corlation,order = "hclust",tl.col = "black",tl.cex = 0.4,title = "ttributes corrlation",cex.main = 1.5, cl.cex=0.8, pch.cex = 0.6,type = "lower", mar=c(0, 0, 1, 0))
 ```
 
-We can see that the three positions which have the least average correlations with other skills are : "RCB","CB","LCB".
+We can see that the three positions which have the least average correlations with other positions are : "RCB","CB","LCB".
 In edition, Strength and Jumping seems to be least correlated with other skills.
 
 b. Show a correlation-plot of players' *34* skill levels 
@@ -488,21 +492,15 @@ team <- rbind(best %>% filter(duplicated(Name) == FALSE) %>% arrange(desc(Overal
 team <- transform(team, Overall = as.numeric(Overall))
 average  <- data.frame(Name = "Team average" ,Overall = mean(team$Overall))
 team <- rbind(team,average )
+```
+The team is:
+```{r}
 knitr::kable(team)
 ```
 
 ```{r}
 fifa_at <- left_join(fifa_players_info[,c(1,2)], fifa_players_attribures[-36],"ID")
-# player_name <- team[1,1]
-# colum <- colnames(fifa_players_attribures[-c(1,36)])
-# first_pleyer <- fifa_at %>% filter(Name== player_name) %>% select(all_of(colum)) %>% as.matrix() %>% t() %>% as.data.frame()
-# top_att <- first_pleyer %>% arrange(desc(V1)) %>% head(10)
-# colnames(top_att) <- player_name
-# top_att <- cbind(row.names(top_att),top_att)
-# chartJSRadar(top_att)
-```
 
-```{r}
 s.plot <- function(i){
   player_name <- team[i,1]
   colum <- colnames(fifa_players_attribures[-c(1,36)])
@@ -540,7 +538,7 @@ ggplot(data=skills_Age, aes(x=Age, y=value, group=variable)) +
   facet_wrap(~variable)+ theme(legend.position="none") 
 ```
 
-we can from the plot that the skills that peaks at the youngest ages are: Balance, Acceleration, Agility.
+we can from the plot that the skills that peaks at the youngest ages are: Balance, Acceleration, Agility and Sprint speed.
 The skills that peaks at the oldest ages are: Composure, Free kick accuracy, Reactions, Strength and all the different skills of GK.
 
 e. Find the 10 players with the highest difference between their wage performance level and the regression model prediction, and list them in a table.
@@ -600,11 +598,11 @@ This method took into account the proportions of players from each country and n
 The index suffers from not being able to handle the possibility that there are clubs with a greater number of players from another club, as a result of which they may seem more diverse than a club with a lower number of players.
 
 b.
-1. There were no titles to the plots. Itג€™s not obvious what the plots are trying to show.
-2. The labels on the X-axis are overriding one another, and have to be rotated by 90גˆ˜ degrees or decrease the caption size.
+1. There were no titles to the plots. It's not obvious what the plots are trying to show.
+2. The labels on the X-axis are overriding one another, and have to be rotated by 90 degrees or decrease the caption size.
 3. The square which does not represent any Cain column in the case should be removed as it may skew the reader.
 4. The columns are filled in the same colors only the frame is slightly different but still it is difficult to notice the difference between the columns, different colors should be given to the columns to make it easier for the reader.
-5. The first plotג€™s Y-axis has a very non-informative also in others axis not so informative.
+5. The first plots Y-axis has a very non-informative also in others axis not so informative.
 6. The function tries to deal with empty cells but ignores a possibility empty string of Club & Nationality.
 
 Since a legend on the side of the plot loads the reader and does not recreate anything since a detail is found on the x-axis then I will delete this legend.
