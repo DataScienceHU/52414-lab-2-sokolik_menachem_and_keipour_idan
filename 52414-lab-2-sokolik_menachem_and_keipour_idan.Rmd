@@ -1,6 +1,6 @@
 ---
 title: "52414: Lab 2"
-author: ""
+author: "Menachem sokolik & Idan Keipour"
 date: "June 1, 2021"
 output: html_document
 ---
@@ -540,6 +540,25 @@ ggplot(data=skills_Age, aes(x=Age, y=value, group=variable)) +
 
 we can from the plot that the skills that peaks at the youngest ages are: Balance, Acceleration, Agility and Sprint speed.
 The skills that peaks at the oldest ages are: Composure, Free kick accuracy, Reactions, Strength and all the different skills of GK.
+
+```{r}
+positions <- left_join(fifa_players[,c(1,3)], fifa_players_positions, by = "ID")[-1]
+positions <- positions[,-c(28,29,30)]
+positions <- filter(.data = positions, Age <= 35)
+# mean function on skills
+mean_of_positions <- aggregate(. ~ Age, data = positions, FUN = mean)
+# Convert an object into a molten data frame.
+skills_Age <-melt(mean_of_positions,"Age")
+
+ggplot(data=skills_Age, aes(x=Age, y=value, group=variable)) + 
+  geom_line(aes(col=variable)) + theme_light() + 
+  ggtitle("3.d player's in different positions changes with age") + 
+  theme(plot.title = element_text(hjust = 0.5))+ 
+  facet_wrap(~variable)+ theme(legend.position="none") 
+```
+
+We can see from the plot that most of the positions the peaks point is at 25 years old like RMB,RCM,LS,LB,CAM and more like this.
+The positions that peaks at the oldest ages are: RCB,LMD,CB.
 
 e. Find the 10 players with the highest difference between their wage performance level and the regression model prediction, and list them in a table.
 ```{r}
