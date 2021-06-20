@@ -243,7 +243,7 @@ knitr::kable(head(top_ten_Value,10), caption = "Most valued players.")
 
 ```{r}
 top_ten_Overall <- fifa_players %>% select(Name, Overall, Value) %>% top_n(10, Overall) %>% arrange(desc(Overall))
-knitr::kable(head(top_ten_Overall,10), caption = "Most valued players.")
+knitr::kable(head(top_ten_Overall,10), caption = "Best Overall players.")
 ```
 
 The best player not in the top-10 valued players is: **M. Neuer**.
