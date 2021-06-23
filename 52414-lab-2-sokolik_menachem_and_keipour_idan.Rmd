@@ -559,7 +559,7 @@ ggplot(data=skills_Age, aes(x=Age, y=value, group=variable)) +
   facet_wrap(~variable)+ theme(legend.position="none") 
 ```
 
-We can see from the plot that most of the positions the peaks point is around 27 years old like RMB,RCM,LS,LB,CAM and more like this.
+We can see from the plot that most of the positions the peaks point is around 25-26 years old like RMB,RCM,LS,LB,CAM and more like this.
 The positions that peaks at the oldest ages are: RCB,LMD,CB.
 
 e. Find the 10 players with the highest difference between their wage performance level and the regression model prediction, and list them in a table.
