@@ -449,6 +449,7 @@ and list them in a table.
 
 a. Calculate the correlation between players' ability in each pair of positions and show a heatmap correlation-plot of the correlations' matrix. What three positions have the *least* average correlations with other positions?
 ```{r}
+
 position_corlation <- cor(fifa_players_positions[-c(1,28:30)])
 
 corrplot(position_corlation,order = "hclust",tl.col = "black",tl.cex = 0.4,title = "position corrlation",cex.main = 1.5, cl.cex=0.8, pch.cex = 0.6,type = "lower", mar=c(0, 0, 1, 0))
@@ -543,6 +544,7 @@ The skills that peaks at the oldest ages are: Composure, Free kick accuracy, Rea
 
 ```{r}
 positions <- left_join(fifa_players[,c(1,3)], fifa_players_positions, by = "ID")[-1]
+positions <- positions %>% filter(Preferred.Positions != "GK ")
 positions <- positions[,-c(28,29,30)]
 positions <- filter(.data = positions, Age <= 35)
 # mean function on skills
@@ -557,7 +559,7 @@ ggplot(data=skills_Age, aes(x=Age, y=value, group=variable)) +
   facet_wrap(~variable)+ theme(legend.position="none") 
 ```
 
-We can see from the plot that most of the positions the peaks point is at 25 years old like RMB,RCM,LS,LB,CAM and more like this.
+We can see from the plot that most of the positions the peaks point is around 27 years old like RMB,RCM,LS,LB,CAM and more like this.
 The positions that peaks at the oldest ages are: RCB,LMD,CB.
 
 e. Find the 10 players with the highest difference between their wage performance level and the regression model prediction, and list them in a table.
